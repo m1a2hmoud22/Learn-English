@@ -23,12 +23,74 @@
         const levelsGrid = document.getElementById('levels-grid');
 
         // --- Game Data ---
-        const words = {
-            "سهل": { "قطة": "cat", "كلب": "dog", "شمس": "sun", "ولد": "boy", "بنت": "girl", "كتاب": "book", "سيارة": "car", "تفاحة": "apple", "ماء": "water", "بيت": "house" },
-            "متوسط": { "سعيد": "happy", "مدرسة": "school", "صديق": "friend", "طعام": "food", "عائلة": "family", "يلعب": "play", "كبير": "big", "صغير": "small", "زهرة": "flower", "شجرة": "tree" },
-            "صعب": { "كمبيوتر": "computer", "معلومات": "information", "مستشفى": "hospital", "مغامرة": "adventure", "مكتبة": "library", "جميل": "beautiful", "قوة": "strength", "مختلف": "different", "معرفة": "knowledge", "حكومة": "government" },
-            "تحدي الوقت": { "كمبيوتر": "computer", "معلومات": "information", "مستشفى": "hospital", "مغامرة": "adventure", "مكتبة": "library", "جميل": "beautiful", "قوة": "strength", "مختلف": "different", "معرفة": "knowledge", "حكومة": "government" }
-        };
+const words = {
+    "سهل": { 
+        "قطة": "cat", 
+        "كلب": "dog", 
+        "شمس": "sun", 
+        "ولد": "boy", 
+        "بنت": "girl", 
+        "كتاب": "book", 
+        "سيارة": "car", 
+        "تفاحة": "apple", 
+        "ماء": "water", 
+        "بيت": "house",
+        "أزرق": "blue", 
+        "أحمر": "red", 
+        "أصفر": "yellow", 
+        "أخضر": "green", 
+        "وردة": "flower"
+    },
+    "متوسط": { 
+        "سعيد": "happy", 
+        "مدرسة": "school", 
+        "صديق": "friend", 
+        "طعام": "food", 
+        "عائلة": "family", 
+        "يلعب": "play", 
+        "كبير": "big", 
+        "صغير": "small", 
+        "زهرة": "flower", 
+        "شجرة": "tree",
+        "سيارة": "car", 
+        "شباك": "window", 
+        "مغسلة": "sink", 
+        "دراجة": "bike"
+    },
+    "صعب": { 
+        "كمبيوتر": "computer", 
+        "معلومات": "information", 
+        "مستشفى": "hospital", 
+        "مغامرة": "adventure", 
+        "مكتبة": "library", 
+        "جميل": "beautiful", 
+        "قوة": "strength", 
+        "مختلف": "different", 
+        "معرفة": "knowledge", 
+        "حكومة": "government",
+        "محيط": "ocean", 
+        "مطار": "airport", 
+        "حيوان": "animal", 
+        "غابة": "forest"
+    },
+    "تحدي الوقت": { 
+        "كمبيوتر": "computer", 
+        "معلومات": "information", 
+        "مستشفى": "hospital", 
+        "مغامرة": "adventure", 
+        "مكتبة": "library", 
+        "جميل": "beautiful", 
+        "قوة": "strength", 
+        "مختلف": "different", 
+        "معرفة": "knowledge", 
+        "حكومة": "government",
+        "محيط": "ocean", 
+        "مطار": "airport", 
+        "حيوان": "animal", 
+        "غابة": "forest"
+    }
+};
+
         const levelOrder = ["سهل", "متوسط", "صعب", "تحدي الوقت"];
         const levelThreshold = 80;
         const positiveFeedback = ["رائع! ✨", "أحسنت! 🎉", "إجابة صحيحة! 👍", "أنت نجم! 🌟", "مذهل! 🤩"];
@@ -106,47 +168,56 @@
             nextQuestion();
         }
 
-        function nextQuestion() {
-            if (questionIndex >= currentQuestions.length) {
-                endGame();
-                return;
-            }
+function nextQuestion() {
+    if (questionIndex >= currentQuestions.length) {
+        endGame();
+        return;
+    }
+    clearInterval(timerInterval);
+    attempts = 0;
+    answerInput.value = '';
+    answerInput.disabled = false;
+    answerInput.focus();
+    messageArea.textContent = '';
+    wordDisplay.classList.remove('correct-answer', 'wrong-answer');
+    checkBtn.disabled = false;
+
+    // اختيار موضوع عشوائي
+    const topics = ["سهل", "متوسط", "صعب", "تحدي الوقت"];
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    const levelWords = words[randomTopic];
+    currentQuestions = Object.entries(levelWords);
+    shuffleArray(currentQuestions);
+
+    const [arabicWord, englishWord] = currentQuestions[questionIndex];
+
+    if (Math.random() < 0.5) {
+        questionPrompt.textContent = `ما هي ترجمة كلمة '${arabicWord}' بالإنجليزية؟`;
+        wordDisplay.textContent = arabicWord;
+        currentCorrectAnswer = englishWord;
+    } else {
+        questionPrompt.textContent = `ما هي ترجمة كلمة '${englishWord}' بالعربية؟`;
+        wordDisplay.textContent = englishWord;
+        currentCorrectAnswer = arabicWord;
+    }
+
+    if (currentLevel === 'تحدي الوقت') startTimer();
+}
+
+
+function startTimer() {
+    timeLeft = 15;
+    timerDisplay.textContent = timeLeft;
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            attempts = 0;
-            answerInput.value = '';
-            answerInput.disabled = false;
-            answerInput.focus();
-            messageArea.textContent = '';
-            wordDisplay.classList.remove('correct-answer', 'wrong-answer');
-            checkBtn.disabled = false;
-
-            const [arabicWord, englishWord] = currentQuestions[questionIndex];
-
-            if (Math.random() < 0.5) {
-                questionPrompt.textContent = `ما هي ترجمة كلمة '${arabicWord}' بالإنجليزية؟`;
-                wordDisplay.textContent = arabicWord;
-                currentCorrectAnswer = englishWord;
-            } else {
-                questionPrompt.textContent = `ما هي ترجمة كلمة '${englishWord}' بالعربية؟`;
-                wordDisplay.textContent = englishWord;
-                currentCorrectAnswer = arabicWord;
-            }
-
-            if (currentLevel === 'تحدي الوقت') startTimer();
+            handleTimeUp();
         }
+    }, 1000);
+}
 
-        function startTimer() {
-            timeLeft = 15;
-            timerDisplay.textContent = timeLeft;
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    handleTimeUp();
-                }
-            }, 1000);
-        }
         
         function handleTimeUp() {
             messageArea.innerHTML = `انتهى الوقت! الإجابة هي: <span class="font-bold text-red-500">${currentCorrectAnswer}</span>`;
@@ -157,13 +228,14 @@
             setTimeout(nextQuestion, 3000);
         }
 
-        function checkAnswer() {
-            const userAnswer = answerInput.value.trim().toLowerCase();
-            if (!userAnswer) return;
-            clearInterval(timerInterval);
-            if (userAnswer === currentCorrectAnswer.toLowerCase()) handleCorrectAnswer();
-            else handleWrongAnswer();
-        }
+function checkAnswer() {
+    const userAnswer = answerInput.value.trim().toLowerCase();
+    if (!userAnswer) return;
+    clearInterval(timerInterval);
+    if (userAnswer === currentCorrectAnswer.toLowerCase()) handleCorrectAnswer();
+    else handleWrongAnswer();
+}
+
 
         function handleCorrectAnswer() {
             score += (currentLevel === 'تحدي الوقت' || attempts === 0) ? 10 : 5;
@@ -226,12 +298,14 @@
         }
 
         // --- Helper Functions ---
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
+// دالة لخلط الأسئلة عشوائيًا
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
         function randomChoice(array) {
             return array[Math.floor(Math.random() * array.length)];
         }
