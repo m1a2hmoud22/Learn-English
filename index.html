@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة نجم الإنجليزية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <!-- <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .game-card {
+            transition: transform 0.3s, box-shadow 0.3s, opacity 0.3s;
+        }
+        .game-card:not(.locked):hover {
+            transform: translateY(-5px);
+        }
+        .btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .correct-answer {
+            animation: correct 0.5s ease-in-out;
+        }
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .wrong-answer {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        /* Locked Level Style */
+        .level-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #e5e7eb;
+        }
+        .dark .level-card.locked {
+            background-color: #374151;
+        }
+        .lock-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5rem;
+            opacity: 0.7;
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); z-index: 40;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .modal-backdrop.active { opacity: 1; pointer-events: all; }
+        .modal {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.9); z-index: 50;
+            transition: transform 0.3s, opacity 0.3s;
+            opacity: 0; pointer-events: none;
+        }
+        .modal.active { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: all; }
+
+        /* Dark Mode Toggle */
+        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: "☀️"; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; text-align: center; line-height: 26px; }
+        input:checked + .slider { background-color: #4a5568; }
+        input:checked + .slider:before { transform: translateX(26px); content: "🌙"; }
+        
+        /* Dark mode styles */
+        .dark { background-color: #1a202c; color: #e2e8f0; }
+        .dark .game-card, .dark .level-card, .dark .modal-content { background-color: #2d3748; border-color: #4a5568; }
+        .dark .btn-primary { background-color: #4299e1; color: #1a202c; }
+        .dark .btn-primary:hover { background-color: #63b3ed; }
+        .dark .text-gray-800 { color: #e2e8f0; }
+        .dark .text-gray-700 { color: #a0aec0; }
+        .dark .text-gray-600 { color: #a0aec0; }
+        .dark .text-gray-500 { color: #cbd5e0; }
+        .dark .bg-gray-100 { background-color: #2d3748; }
+        .dark .bg-white { background-color: #2d3748; }
+        .dark input { background-color: #4a5568; color: #e2e8f0; border-color: #718096; }
+        .dark .border-gray-300 { border-color: #4a5568; }
+        .dark .bg-blue-100 { background-color: #2c5282; }
+    </style> -->
+</head>
+<body class="bg-gray-100">
+
+    <div id="app-container" class="container mx-auto p-4 min-h-screen flex flex-col items-center justify-center">
+
+        <header class="w-full max-w-3xl mx-auto flex justify-between items-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-500">🌟 لعبة نجم الإنجليزية</h1>
+            <label class="toggle-switch">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </label>
+        </header>
+
+        <div id="level-selection-screen" class="w-full max-w-3xl text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">اختر مستوى الصعوبة</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="levels-grid">
+                <div id="level-سهل" data-level="سهل" class="level-card bg-white p-6 rounded-xl shadow-lg cursor-pointer game-card border-4 border-transparent hover:border-green-400 relative">
+                    <div class="lock-icon hidden">🔒</div>
+                    <div class="text-5xl mb-2">🧸</div>
+                    <h3 class="text-xl font-bold text-green-500">سهل</h3>
+                </div>
+                <div id="level-متوسط" data-level="متوسط" class="level-card bg-white p-6 rounded-xl shadow-lg cursor-pointer game-card border-4 border-transparent hover:border-yellow-400 relative">
+                    <div class="lock-icon hidden">🔒</div>
+                    <div class="text-5xl mb-2">🚀</div>
+                    <h3 class="text-xl font-bold text-yellow-500">متوسط</h3>
+                </div>
+                <div id="level-صعب" data-level="صعب" class="level-card bg-white p-6 rounded-xl shadow-lg cursor-pointer game-card border-4 border-transparent hover:border-red-400 relative">
+                    <div class="lock-icon hidden">🔒</div>
+                    <div class="text-5xl mb-2">🧠</div>
+                    <h3 class="text-xl font-bold text-red-500">صعب</h3>
+                </div>
+                 <div id="level-تحدي الوقت" data-level="تحدي الوقت" class="level-card bg-white p-6 rounded-xl shadow-lg cursor-pointer game-card border-4 border-transparent hover:border-purple-400 relative">
+                    <div class="lock-icon hidden">🔒</div>
+                    <div class="text-5xl mb-2">⏱️</div>
+                    <h3 class="text-xl font-bold text-purple-500">تحدي الوقت</h3>
+                </div>
+            </div>
+            <button id="rules-btn" class="btn mt-8 bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600">قواعد اللعبة</button>
+        </div>
+
+        <div id="game-screen" class="w-full max-w-2xl mx-auto hidden">
+            <div class="game-card bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+                <div class="flex justify-between items-center mb-6 border-b border-gray-300 pb-4">
+                    <div><span class="text-gray-600">المستوى:</span> <span id="level-display" class="font-bold text-blue-500"></span></div>
+                    <div id="timer-container" class="hidden"><span class="text-gray-600">الوقت:</span> <span id="timer-display" class="font-bold text-red-500">15</span></div>
+                    <div><span class="text-gray-600">النقاط:</span> <span id="score-display" class="font-bold text-green-500">0</span></div>
+                </div>
+                <div class="text-center">
+                    <p id="question-prompt" class="text-lg text-gray-600 mb-2"></p>
+                    <h2 id="word-display" class="text-4xl md:text-5xl font-bold text-gray-800 mb-6 h-20 flex items-center justify-center"></h2>
+                    <input type="text" id="answer-input" class="w-full p-3 text-center text-xl border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="اكتب إجابتك هنا...">
+                    <button id="check-btn" class="btn btn-primary w-full mt-4 bg-blue-500 text-white font-bold py-3 rounded-lg text-xl hover:bg-blue-600">تحقق</button>
+                </div>
+                <div id="message-area" class="mt-4 text-center font-semibold text-lg h-8"></div>
+            </div>
+        </div>
+
+        <div id="final-score-screen" class="w-full max-w-md mx-auto text-center hidden">
+            <div class="game-card bg-white p-8 rounded-2xl shadow-xl">
+                <div id="final-emoji" class="text-7xl mb-4">🎉</div>
+                <h2 id="final-title" class="text-3xl font-bold text-gray-800 mb-2">أداء رائع!</h2>
+                <p id="final-message" class="text-gray-600 mb-4">لقد أكملت المستوى بنجاح.</p>
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <p class="text-lg text-gray-700">نقاطك النهائية هي:</p>
+                    <p id="final-score-display" class="text-5xl font-bold text-blue-500 my-2">0</p>
+                </div>
+                <button onclick="playAgain()" class="btn w-full mt-6 bg-green-500 text-white font-bold py-3 rounded-lg text-xl hover:bg-green-600">العودة للقائمة الرئيسية</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rules-modal-backdrop" class="modal-backdrop"></div>
+    <div id="rules-modal" class="modal w-11/12 max-w-lg">
+        <div class="modal-content bg-white p-6 rounded-lg shadow-xl text-gray-800">
+            <div class="flex justify-between items-center border-b border-gray-300 pb-3 mb-4">
+                <h2 class="text-2xl font-bold text-blue-500">قواعد اللعبة</h2>
+                <button id="close-rules-btn" class="text-3xl font-bold text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <ul class="list-disc list-inside space-y-3">
+                <li>يجب عليك إكمال المستويات بالترتيب.</li>
+                <li>افتح المستوى التالي بحصولك على 80 نقطة على الأقل في المستوى الحالي.</li>
+                <li>لديك محاولتان لكل سؤال في المستويات (سهل، متوسط، صعب).</li>
+                <li>**نظام النقاط:**
+                    <ul class="list-disc list-inside pr-6 mt-1 space-y-1">
+                        <li><span class="font-bold text-green-500">10 نقاط</span> للإجابة الصحيحة من المحاولة الأولى.</li>
+                        <li><span class="font-bold text-yellow-500">5 نقاط</span> للإجابة الصحيحة من المحاولة الثانية.</li>
+                    </ul>
+                </li>
+                <li>**تحدي الوقت:** لديك <span class="font-bold text-red-500">15 ثانية</span> فقط للإجابة، والإجابة الصحيحة تمنحك 10 نقاط.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- <script>
+        // --- DOM Elements ---
+        const levelSelectionScreen = document.getElementById('level-selection-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const finalScoreScreen = document.getElementById('final-score-screen');
+        const levelDisplay = document.getElementById('level-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerContainer = document.getElementById('timer-container');
+        const timerDisplay = document.getElementById('timer-display');
+        const questionPrompt = document.getElementById('question-prompt');
+        const wordDisplay = document.getElementById('word-display');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const messageArea = document.getElementById('message-area');
+        const finalScoreDisplay = document.getElementById('final-score-display');
+        const finalEmoji = document.getElementById('final-emoji');
+        const finalTitle = document.getElementById('final-title');
+        const finalMessage = document.getElementById('final-message');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const rulesBtn = document.getElementById('rules-btn');
+        const closeRulesBtn = document.getElementById('close-rules-btn');
+        const rulesModal = document.getElementById('rules-modal');
+        const rulesModalBackdrop = document.getElementById('rules-modal-backdrop');
+        const levelsGrid = document.getElementById('levels-grid');
+
+        // --- Game Data ---
+        const words = {
+            "سهل": { "قطة": "cat", "كلب": "dog", "شمس": "sun", "ولد": "boy", "بنت": "girl", "كتاب": "book", "سيارة": "car", "تفاحة": "apple", "ماء": "water", "بيت": "house" },
+            "متوسط": { "سعيد": "happy", "مدرسة": "school", "صديق": "friend", "طعام": "food", "عائلة": "family", "يلعب": "play", "كبير": "big", "صغير": "small", "زهرة": "flower", "شجرة": "tree" },
+            "صعب": { "كمبيوتر": "computer", "معلومات": "information", "مستشفى": "hospital", "مغامرة": "adventure", "مكتبة": "library", "جميل": "beautiful", "قوة": "strength", "مختلف": "different", "معرفة": "knowledge", "حكومة": "government" },
+            "تحدي الوقت": { "كمبيوتر": "computer", "معلومات": "information", "مستشفى": "hospital", "مغامرة": "adventure", "مكتبة": "library", "جميل": "beautiful", "قوة": "strength", "مختلف": "different", "معرفة": "knowledge", "حكومة": "government" }
+        };
+        const levelOrder = ["سهل", "متوسط", "صعب", "تحدي الوقت"];
+        const levelThreshold = 80;
+        const positiveFeedback = ["رائع! ✨", "أحسنت! 🎉", "إجابة صحيحة! 👍", "أنت نجم! 🌟", "مذهل! 🤩"];
+        const encouragingFeedback = ["حاول مرة أخرى، أنت تستطيع! 💪", "لا بأس، فكر مرة أخرى! 🤔", "قريب جدًا، حاول مجددًا! 🎯"];
+
+        // --- Game State ---
+        let currentLevel = '';
+        let score = 0;
+        let currentQuestions = [];
+        let questionIndex = 0;
+        let attempts = 0;
+        let currentCorrectAnswer = '';
+        let timerInterval;
+        let timeLeft = 15;
+
+        // --- Event Listeners ---
+        checkBtn.addEventListener('click', checkAnswer);
+        answerInput.addEventListener('keyup', (event) => { if (event.key === 'Enter') checkBtn.click(); });
+        darkModeToggle.addEventListener('change', () => document.body.classList.toggle('dark'));
+        rulesBtn.addEventListener('click', () => {
+            rulesModal.classList.add('active');
+            rulesModalBackdrop.classList.add('active');
+        });
+        closeRulesBtn.addEventListener('click', closeRulesModal);
+        rulesModalBackdrop.addEventListener('click', closeRulesModal);
+
+        function closeRulesModal() {
+            rulesModal.classList.remove('active');
+            rulesModalBackdrop.classList.remove('active');
+        }
+
+        // --- Game Initialization ---
+        function init() {
+            updateLevelsUI();
+            levelsGrid.addEventListener('click', (e) => {
+                const levelCard = e.target.closest('.level-card');
+                if (levelCard && !levelCard.classList.contains('locked')) {
+                    startGame(levelCard.dataset.level);
+                }
+            });
+        }
+        
+        function updateLevelsUI() {
+            const unlockedLevelIndex = levelOrder.indexOf(localStorage.getItem('unlockedLevel') || 'سهل');
+            document.querySelectorAll('.level-card').forEach((card, index) => {
+                const lockIcon = card.querySelector('.lock-icon');
+                if (index > unlockedLevelIndex) {
+                    card.classList.add('locked');
+                    lockIcon.classList.remove('hidden');
+                } else {
+                    card.classList.remove('locked');
+                    lockIcon.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- Game Functions ---
+        function startGame(level) {
+            currentLevel = level;
+            score = 0;
+            questionIndex = 0;
+            levelDisplay.textContent = level;
+            scoreDisplay.textContent = score;
+            
+            timerContainer.classList.toggle('hidden', level !== 'تحدي الوقت');
+
+            const levelWords = words[level];
+            currentQuestions = Object.entries(levelWords);
+            shuffleArray(currentQuestions);
+
+            levelSelectionScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            finalScoreScreen.classList.add('hidden');
+
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            if (questionIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+            clearInterval(timerInterval);
+            attempts = 0;
+            answerInput.value = '';
+            answerInput.disabled = false;
+            answerInput.focus();
+            messageArea.textContent = '';
+            wordDisplay.classList.remove('correct-answer', 'wrong-answer');
+            checkBtn.disabled = false;
+
+            const [arabicWord, englishWord] = currentQuestions[questionIndex];
+
+            if (Math.random() < 0.5) {
+                questionPrompt.textContent = `ما هي ترجمة كلمة '${arabicWord}' بالإنجليزية؟`;
+                wordDisplay.textContent = arabicWord;
+                currentCorrectAnswer = englishWord;
+            } else {
+                questionPrompt.textContent = `ما هي ترجمة كلمة '${englishWord}' بالعربية؟`;
+                wordDisplay.textContent = englishWord;
+                currentCorrectAnswer = arabicWord;
+            }
+
+            if (currentLevel === 'تحدي الوقت') startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            timerDisplay.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeUp();
+                }
+            }, 1000);
+        }
+        
+        function handleTimeUp() {
+            messageArea.innerHTML = `انتهى الوقت! الإجابة هي: <span class="font-bold text-red-500">${currentCorrectAnswer}</span>`;
+            messageArea.style.color = '#EF4444';
+            answerInput.disabled = true;
+            checkBtn.disabled = true;
+            questionIndex++;
+            setTimeout(nextQuestion, 3000);
+        }
+
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            if (!userAnswer) return;
+            clearInterval(timerInterval);
+            if (userAnswer === currentCorrectAnswer.toLowerCase()) handleCorrectAnswer();
+            else handleWrongAnswer();
+        }
+
+        function handleCorrectAnswer() {
+            score += (currentLevel === 'تحدي الوقت' || attempts === 0) ? 10 : 5;
+            scoreDisplay.textContent = score;
+            messageArea.textContent = randomChoice(positiveFeedback);
+            messageArea.style.color = '#10B981';
+            wordDisplay.classList.add('correct-answer');
+            answerInput.disabled = true;
+            checkBtn.disabled = true;
+            questionIndex++;
+            setTimeout(nextQuestion, 1500);
+        }
+        
+        function handleWrongAnswer() {
+            attempts++;
+            wordDisplay.classList.add('wrong-answer');
+            setTimeout(() => wordDisplay.classList.remove('wrong-answer'), 500);
+
+            if (currentLevel === 'تحدي الوقت' || attempts >= 2) {
+                messageArea.innerHTML = `للأسف! الإجابة الصحيحة هي: <span class="font-bold text-red-500">${currentCorrectAnswer}</span>`;
+                messageArea.style.color = '#EF4444';
+                answerInput.disabled = true;
+                checkBtn.disabled = true;
+                questionIndex++;
+                setTimeout(nextQuestion, 3000);
+            } else {
+                messageArea.textContent = randomChoice(encouragingFeedback);
+                messageArea.style.color = '#F59E0B';
+                answerInput.value = '';
+                answerInput.focus();
+            }
+        }
+
+        function endGame() {
+            const currentLevelIndex = levelOrder.indexOf(currentLevel);
+            const unlockedLevelIndex = levelOrder.indexOf(localStorage.getItem('unlockedLevel') || 'سهل');
+            
+            // Check for unlocking the next level
+            if (score >= levelThreshold && currentLevelIndex < levelOrder.length - 1 && currentLevelIndex >= unlockedLevelIndex) {
+                 const nextLevel = levelOrder[currentLevelIndex + 1];
+                 localStorage.setItem('unlockedLevel', nextLevel);
+                 finalEmoji.textContent = '🏆';
+                 finalTitle.textContent = 'تهانينا!';
+                 finalMessage.textContent = `لقد فتحت قفل المستوى التالي: ${nextLevel}!`;
+            } else {
+                 finalEmoji.textContent = '🎉';
+                 finalTitle.textContent = 'أداء رائع!';
+                 finalMessage.textContent = 'لقد أكملت المستوى بنجاح.';
+            }
+
+            gameScreen.classList.add('hidden');
+            finalScoreScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = score;
+        }
+
+        function playAgain() {
+            finalScoreScreen.classList.add('hidden');
+            levelSelectionScreen.classList.remove('hidden');
+            updateLevelsUI();
+        }
+
+        // --- Helper Functions ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        function randomChoice(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+        
+        // --- Start the app ---
+        init();
+    </script> -->
+    <script src="main.js"></script>
+</body>
+</html>
